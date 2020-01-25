@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Awesome Company</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    <link rel="stylesheet" media="screen" href="style.css"/>
+</head>
+<body>
+<header>
+    <h1>Awesome company</h1>
+    <p class="tagline">A company for companions!</p>
+</header>
+<div class="content">
+    <article class="column">
+        <header>
+            <h3>Who are we?</h3>
+        </header>
+        <section>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                ex ea commodo consequat.</p>
+        </section>
+    </article>
+    <article class="column">
+        <header>
+            <h3>Who are our customers?</h3>
+        </header>
+        <section>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                ex ea commodo consequat.</p>
+        </section>
+    </article>
+    <article class="column">
+        <header>
+            <h3>Ask for quota!</h3>
+        </header>
+        <section>
+            <form id="quota" action="#" method="post">
+                <p>
+                    <select id="products" required>
+                        <option value="">Chose product</option>
+                        <option value="any">Any product</option>
+                        <option value="product1">Product 1</option>
+                        <option value="product2">Product 2</option>
+                        <option value="product3">Product 3</option>
+                    </select>
+                </p>
+                <p>
+                    <input type="email" id="email" placeholder="Enter email..." required/>
+                </p>
+                <p>
+                    <textarea id="additional" placeholder="Additional information..." required></textarea>
+                </p>
+                <p>
+                    <button id="send" type="submit">Send</button>
+                </p>
+            </form>
+        </section>
+    </article>
+</div>
+<footer>
+    <p>Awesome Company © <span id="company-copyright-year"></span>, to get in contact with support, please contact one
+        of the following:
+        <span id="support-team"></span>!</p>
+</footer>
+<script>
+    document.getElementById('quota').addEventListener('submit', (e) => {
+        e.preventDefault();
+        console.log(this);
+        document.getElementById('quota').innerHTML = '<p id="quota-message">Thank you for your request, we will get back to you as soon as possible. Stay awesome, you...</p>';
+    });
+
+    const makeXhrRequest = (url) => {
+        return new Promise((resolve) => {
+            const req = new XMLHttpRequest();
+            req.addEventListener('load', (data) => {
+                if (req.status === 200) {
+                    console.log(req.response);
+                    resolve(JSON.parse(req.response));
+                }
+            });
+            req.open('GET', url);
+            req.send();
+        })
+    }
+
+    const setFooterCopyright = () => {
+        document.getElementById('company-copyright-year').innerText = new Date().getFullYear().toString();
+    };
+
+    const getSupportDelimiter = (index, total) => {
+        if (index === total - 1) {
+            return '';
+        } else if (index === total - 2) {
+            return ' or ';
+        } else {
+            return ', '
+        }
+    };
+
+    const setFooterSupportEmails = () => {
+        makeXhrRequest('api/support.json')
+            .then((data) => {
+                data.forEach((supportPerson, index) => {
+                    const a = document.createElement('a');
+                    a.setAttribute('href', `mailto:${supportPerson.mail}`);
+                    a.innerText = `${supportPerson.name}${getSupportDelimiter(index, data.length)}`;
+                    document.getElementById('support-team').appendChild(a);
+                });
+            })
+    };
+
+    setFooterCopyright();
+    setFooterSupportEmails();
+</script>
+</body>
+</html>

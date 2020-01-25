@@ -1,0 +1,19 @@
+{
+  "name": "a-guid-to-cypress",
+  "version": "1.0.0",
+  "description": "This is a small guide on how to use [Cypress](https://cypress.io) to test your site. It won't cover everything but will get you started with writing end to end tests for your site.",
+  "main": "index.js",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "start": "simple-server src/ 1337"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/mocha": "^5.2.7",
+    "cypress": "^3.8.2",
+    "simple-server": "^1.1.1"
+  },
+  "dependencies": {}
+}
