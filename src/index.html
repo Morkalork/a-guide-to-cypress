@@ -101,13 +101,17 @@
     };
 
     const setFooterSupportEmails = () => {
+        const supportTeam = document.getElementById('support-team');
         makeXhrRequest('api/support.json')
             .then((data) => {
                 data.forEach((supportPerson, index) => {
                     const a = document.createElement('a');
                     a.setAttribute('href', `mailto:${supportPerson.mail}`);
-                    a.innerText = `${supportPerson.name}${getSupportDelimiter(index, data.length)}`;
-                    document.getElementById('support-team').appendChild(a);
+                    a.innerText = supportPerson.name;
+                    const span = document.createElement('span');
+                    span.innerText = getSupportDelimiter(index, data.length);
+                    supportTeam.appendChild(a);
+                    supportTeam.appendChild(span);
                 });
             })
     };

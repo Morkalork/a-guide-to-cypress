@@ -11,6 +11,6 @@ context("Footer", () => {
         cy.visit('http://localhost:1337');
         cy.get('#support-team a').should('have.length', 3);
         cy.get('#support-team a').eq(0).contains('Test 1');
-        cy.get('#support-team a').eq(0).invoke('attr', 'href', 'test1@support.org');
+        cy.get('#support-team a').eq(0).invoke('attr', 'href').should('eq', 'mailto:test1@support.org');
     });
 });

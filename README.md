@@ -37,7 +37,7 @@ Their wireframe artist is the cheapest one available and even though there is mo
  * A product must be chosen
  * The email is required should be verified and show an error message if invalid
  * Additional information is required
- * The footer should always be up to date and contain the relevant information
+ * The footer should always be up to date and contain the relevant information and the support emails should be loaded from the server
  
 With all these features in mind it might be a good idea to use testing as part of our development process.
 
@@ -145,18 +145,18 @@ context("Quota", () => {
         // Before each test, let's make sure we're currently visiting the site
         cy.visit('http://localhost:1337');
     });
-    it('should fail if form is not properly filled in', () => {
-        cy.get('#send').click();
-        cy.get('#quota-message').should('not.exist');
+    it('should not show the quota message if the form is not properly filled in', () => {
+        cy.get('button#send').click();
+        cy.get('p#quota-message').should('not.exist');
     });
-    it('should succeed if form is properly filled in', () => {
-        cy.get('#products > option')
+    it('should show the quota message if the form is properly filled in', () => {
+        cy.get('select#products > option')
             .eq(1)
             .invoke('attr', 'selected', true);
-        cy.get('#email').type('a-real-email-I-swear@fakefakefake.com');
-        cy.get('#additional').type('I really want your awesome products!');
-        cy.get('#send').click();
-        cy.get('#quota-message').should('exist');
+        cy.get('input#email').type('a-real-email-I-swear@fakefakefake.com');
+        cy.get('textarea#additional').type('I really want your awesome products!');
+        cy.get('button#send').click();
+        cy.get('p#quota-message').should('exist');
     });
 });
 ```
@@ -276,6 +276,7 @@ To use this mock, set your test up like this:
 
 context("Footer", () => {
     it('should have the correct copyright year', () => {
+        cy.visit('http://localhost:1337');
         cy.get('#company-copyright-year').contains(new Date().getFullYear());
     });
     it('should have three correct support links', () => {
@@ -284,7 +285,7 @@ context("Footer", () => {
         cy.visit('http://localhost:1337');
         cy.get('#support-team a').should('have.length', 3);
         cy.get('#support-team a').eq(0).contains('Test 1');
-        cy.get('#support-team a').eq(0).invoke('attr', 'href', 'test1@support.org');
+        cy.get('#support-team a').eq(0).invoke('attr', 'href').should('eq', 'mailto:test1@support.org');
     });
 });
 ```
@@ -388,18 +389,18 @@ context("Quota", () => {
         // Before each test, let's make sure we're currently visiting the site
         cy.visit('http://localhost:1337');
     });
-    it('should fail if form is not properly filled in', () => {
-        cy.get('#send').click();
-        cy.get('#quota-message').should('not.exist');
+    it('should not show the quota message if the form is not properly filled in', () => {
+        cy.get('button#send').click();
+        cy.get('p#quota-message').should('not.exist');
     });
-    it('should succeed if form is properly filled in', () => {
-        cy.get('#products > option')
+    it('should show the quota message if the form is properly filled in', () => {
+        cy.get('select#products > option')
             .eq(1)
             .invoke('attr', 'selected', true);
-        cy.get('#email').type('a-real-email-I-swear@fakefakefake.com');
-        //cy.get('#additional').type('I really want your awesome products!'); // <- OH NOSE!
-        cy.get('#send').click();
-        cy.get('#quota-message').should('exist');
+        cy.get('input#email').type('a-real-email-I-swear@fakefakefake.com');
+        // cy.get('textarea#additional').type('I really want your awesome products!');      // <- OH NOSE!
+        cy.get('button#send').click();
+        cy.get('p#quota-message').should('exist');
     });
 });
 ```
