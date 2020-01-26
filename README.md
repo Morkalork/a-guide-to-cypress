@@ -1,5 +1,7 @@
 # Using Cypress for end to end testing
 
+[![Build Status](https://travis-ci.com/Morkalork/a-guide-to-cypress.svg?branch=master)](https://travis-ci.com/Morkalork/a-guide-to-cypress)
+
 This is a small guide on how to use [Cypress](https://cypress.io) to test your site. It won't cover everything but will get you started with writing end to end tests for your site.
 
 ## Installation
@@ -304,3 +306,104 @@ https://docs.cypress.io/examples/examples/recipes.html
 **A one day Cypress workshop:**
 
 https://github.com/cypress-io/testing-workshop-cypress
+
+## Setting up Cypress with a ci tool such as Travis
+
+We probably want to run these tests as part of our ci configuration, so in short, to set it up with Travis, here's how we'll do it!
+
+We start by adding an npm script for running the tests:
+
+```
+...
+    "cypress:ci": "cypress run",
+...
+``` 
+
+This will run Cypress without the test runner or anything that requires a desktop. But we might want to record our tests. To do this, we need to setup recording for your project.
+We can do this by opening the Test Runner (`npm run cypress:open` in this project) and visit the **Run** tab in the Test Runner interface:
+
+![One time only!](./assets/screenshots/cypress-setup-recording.PNG)
+
+Then click on the "Set up project to record" and login using our GitHub account. Simply follow the wizard to set up our recording privileges and finish it. After this our `cypress.json` file should've been updated with a unique projectId property. Add one more property to it called `videoUploadOnPasses` and set it to false (meaning we'll only record failing tests, not passing):
+
+```json
+{
+  "projectId": "wygqi1",
+  "videoUploadOnPasses": false
+}
+```
+
+After this we add a `.travis.yml` file to our project with the following setup:
+
+```yml
+language: node_js
+node_js:
+  - 12
+addons:
+  apt:
+    packages:
+      # Ubuntu 16+ does not install this dependency by default, so we need to install it ourselves
+      - libgconf-2-4
+cache:
+  # Caches $HOME/.npm when npm ci is default script command
+  # Caches node_modules in all other cases
+  npm: true
+  directories:
+    # we also need to cache folder with Cypress binary
+    - ~/.cache
+install:
+  - npm ci
+before_script:
+  - npm start & wait-on http://localhost:1337
+script:
+  - npm run cypress:ci
+```
+
+(I've borrowed a lot from the exising Cypress tutorials here)
+So the interesting parts surround the installation and running of our tests here. Let's look at our scripts again:
+
+```json
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:ci": "cypress run --record --key bc2fc600-6396-4dc7-aa15-1be0caac4790",
+    "start": "simple-server src/ 1337"
+  },
+```
+
+I have now added `--record --key bc2fc600-6396-4dc7-aa15-1be0caac4790` to our cypress:ci-script. You'll get this key when you setup the recordings, but if you missed it you can logon to your Cypress Dashboard again (go through the Test Runner -> Runs -> Click on project) by logging in and going to Project Settings -> Record Keys.
+
+I've installed the `wait-on` npm package for a reason. We want to make sure that our server has started before executing our ci-script, so we run `npm start` which starts our simple server, then wait-on will wait until it gets a response from the server and *then* continue the execution. There are other ways, I found this one rather pleasing.
+
+Now register an account at https://travis-ci.com and add your repository. Once it fains a `.travis.yml` file it will execute it and run your tests.
+
+## Test a failure being recorded
+
+So, to try this out, we open up the ol' `quota.spec.js` file and comment our a crucial line for our test:
+
+```js
+/// <reference types="Cypress" />
+
+context("Quota", () => {
+    beforeEach(() => {
+        // Before each test, let's make sure we're currently visiting the site
+        cy.visit('http://localhost:1337');
+    });
+    it('should fail if form is not properly filled in', () => {
+        cy.get('#send').click();
+        cy.get('#quota-message').should('not.exist');
+    });
+    it('should succeed if form is properly filled in', () => {
+        cy.get('#products > option')
+            .eq(1)
+            .invoke('attr', 'selected', true);
+        cy.get('#email').type('a-real-email-I-swear@fakefakefake.com');
+        //cy.get('#additional').type('I really want your awesome products!'); // <- OH NOSE!
+        cy.get('#send').click();
+        cy.get('#quota-message').should('exist');
+    });
+});
+```
+
+Then we can run the ci build locally (`npm run cypress:ci`) and it will record a video which might look something like this:
+
+[Open video of failing](./assets/videos/quota-failure.mp4)

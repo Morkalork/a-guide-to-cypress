@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "cypress:open": "cypress open",
+    "cypress:ci": "cypress run --record --key bc2fc600-6396-4dc7-aa15-1be0caac4790",
     "start": "simple-server src/ 1337"
   },
   "keywords": [],
@@ -13,7 +14,8 @@
   "devDependencies": {
     "@types/mocha": "^5.2.7",
     "cypress": "^3.8.2",
-    "simple-server": "^1.1.1"
+    "simple-server": "^1.1.1",
+    "wait-on": "^4.0.0"
   },
   "dependencies": {}
 }
