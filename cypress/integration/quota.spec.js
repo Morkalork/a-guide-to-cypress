@@ -14,7 +14,7 @@ context("Quota", () => {
             .eq(1)
             .invoke('attr', 'selected', true);
         cy.get('input#email').type('a-real-email-I-swear@fakefakefake.com');
-        cy.get('textarea#additional').type('I really want your awesome products!');
+        // cy.get('textarea#additional').type('I really want your awesome products!');
         cy.get('button#send').click();
         cy.get('p#quota-message').should('exist');
     });
